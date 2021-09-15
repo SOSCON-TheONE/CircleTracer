@@ -2,7 +2,12 @@ import { readFileSync } from 'fs';
 import * as flatbuffers from 'flatbuffers';
 import { Model } from './circle-analysis/circle/model';
 import { BuiltinOperator } from './circle-analysis/circle/builtin-operator'
-import { BuiltinOptions } from './circle-analysis/circle/builtin-options'
+import { BuiltinOptions, unionToBuiltinOptions } from './circle-analysis/circle/builtin-options'
+import { Conv2DOptions } from './circle-analysis/circle/conv2-d-options'
+import { Pool2DOptions } from './circle-analysis/circle/pool2-d-options'
+import { Padding } from './circle-analysis/circle/padding'
+import { ActivationFunctionType } from './circle-analysis/circle/activation-function-type'
+
 interface HashNode {
     name: string;
     type: Int32Array;
@@ -36,7 +41,6 @@ let file = readFileSync('./target/inception_v3.circle');
 const buffer = file instanceof Uint8Array ? file : new Uint8Array(file);
 let buf = new flatbuffers.ByteBuffer(buffer);
 let model = Model.getRootAsModel(buf);
-
 let subgraphsLength = model.subgraphsLength();
 
 let builtin_code = [];
@@ -71,18 +75,42 @@ for(var subgraph_idx = 0; subgraph_idx < subgraphsLength ; subgraph_idx++){
     }
     console.log('##OPERATOR##')
     //operator에서 나오는 inputs와 outputs는 tensor의 location을 의미한다.
-    for(let operator_idx = 0; operator_idx < _subgraphs.operatorsLength(); operator_idx++){
+    for (let operator_idx = 0; operator_idx < _subgraphs.operatorsLength(); operator_idx++){
         let operator = _subgraphs.operators(operator_idx)!;
         console.log('--'+operator_idx+'--');
         console.log('customOp: '+operator.customOptionsArray());
         console.log('NODE PROPERTIES');
+        console.log('bb_pos: ' + operator.bb_pos);
 
+        
         let prop_type = builtin_code[operator.opcodeIndex()];
         let prop_location = operator_idx;
         let model_prop:NODE_PROPERTIES = {type:prop_type, location:prop_location};
 
         console.log('\ttype: '+builtin_code[operator.opcodeIndex()]);
-        console.log('\tlocation: '+operator_idx);
+        console.log('\tlocation: ' + operator_idx);
+        console.log('\tATTRIBUTE');
+
+        //Operator에 사용된 OptionType을 이용해서 처리
+        switch (BuiltinOptions[operator.builtinOptionsType()]) {
+            case 'Conv2DOptions':
+                let conv2Dopt = new Conv2DOptions(); //해당 옵션 처리를 담을 객체 생성
+                conv2Dopt = operator.builtinOptions<flatbuffers.Table>(conv2Dopt); //그 객체의 bb, bb_pos를 현재 접근하려는 버퍼와 인덱스로 수정, 얘를 기반으로 정보들 추출
+                outputConv2D(conv2Dopt);
+                break;
+            case 'Pool2DOptions':
+                let pool2Dopt = new Pool2DOptions();
+                pool2Dopt = operator.builtinOptions<flatbuffers.Table>(pool2Dopt);
+                outputPool2D(pool2Dopt);
+                break;
+            case 'ConcatenationOptions':
+                break;
+            case 'SoftMaxOptions':
+                break;
+            case 'ReshapeOptions':
+                break;
+        }
+
         
         console.log('\tINPUTS');
         let node_inputs:Array<NODE_INPUT>=[];
@@ -124,4 +152,22 @@ for(var subgraph_idx = 0; subgraph_idx < subgraphsLength ; subgraph_idx++){
         }
         result.push(model_oper);
     }
+}
+
+function outputConv2D(conv2Dopt : Conv2DOptions) {
+    console.log('\t\tdialtaion_h_factor: ' + conv2Dopt.dilationHFactor());
+    console.log('\t\tdialtaion_w_factor: ' + conv2Dopt.dilationWFactor());
+    console.log('\t\tfused_activation_function: ' + ActivationFunctionType[conv2Dopt.fusedActivationFunction()]);
+    console.log('\t\tpadding: ' + Padding[conv2Dopt.padding()]);
+    console.log('\t\tstride_h: ' + conv2Dopt.strideH());
+    console.log('\t\tstride_w: ' + conv2Dopt.strideW());
+}
+
+function outputPool2D(pool2Dopt : Pool2DOptions) {
+    console.log('\t\tdialtaion_h_factor: ' + pool2Dopt.filterHeight());
+    console.log('\t\tdialtaion_w_factor: ' + pool2Dopt.filterWidth());
+    console.log('\t\tfused_activation_function: ' + ActivationFunctionType[pool2Dopt.fusedActivationFunction()]);
+    console.log('\t\tpadding: ' + Padding[pool2Dopt.padding()]);
+    console.log('\t\tstride_h: ' + pool2Dopt.strideH());
+    console.log('\t\tstride_w: ' + pool2Dopt.strideW());
 }
