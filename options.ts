@@ -438,13 +438,6 @@ export class OptionsAttribute {
         attributes.push({ attribute: 'mode', value: MirrorPadMode[mirrorPadOpt.mode()] });
     }
 
-    static getSplitVAttr(operator: Operator , attributes: Array<NODE_ATTRIBUTES>) {
-        let splitOpt = new SplitOptions();
-        splitOpt = operator.builtinOptions<flatbuffers.Table>(splitOpt);
-
-        attributes.push({ attribute: 'num_splits', value: splitOpt.numSplits() });
-    }
-
     static getUniqueAttr(operator: Operator , attributes: Array<NODE_ATTRIBUTES>) {
         let uniqueOpt = new UniqueOptions();
         uniqueOpt = operator.builtinOptions<flatbuffers.Table>(uniqueOpt);
