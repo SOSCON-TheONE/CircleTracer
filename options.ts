@@ -12,6 +12,7 @@ import { BidirectionalSequenceRNNOptions } from './circle-analysis/circle/bidire
 import { CallOptions } from './circle-analysis/circle/call-options';
 import { CastOptions } from './circle-analysis/circle/cast-options';
 import { ConcatenationOptions } from './circle-analysis/circle/concatenation-options';
+import { ConcatEmbeddingsOptions } from './circle-analysis/circle/concat-embeddings-options'
 import { Conv2DOptions } from './circle-analysis/circle/conv2-d-options';
 import { DepthToSpaceOptions } from './circle-analysis/circle/depth-to-space-options';
 import { DepthwiseConv2DOptions } from './circle-analysis/circle/depthwise-conv2-d-options';
@@ -87,20 +88,27 @@ export class OptionsAttribute {
     }
 
     static getConcatEmbeddingAttr(operator: Operator, attributes: Array<NODE_ATTRIBUTES>) {
-        // let concatEmbaddingOpt = new ConcatEmbeddingsOptions();
-        // concatEmbaddingOpt = operator.builtinOptions<flatbuffers.Table>(concatEmbaddingOpt);
+        let concatEmbaddingOpt = new ConcatEmbeddingsOptions();
+        concatEmbaddingOpt = operator.builtinOptions<flatbuffers.Table>(concatEmbaddingOpt);
         
-        // let channel_length = concatEmbaddingOpt.numChannels();
+        let numChannelLength = concatEmbaddingOpt.numChannels();
+        let embeddingDimPerChannelLength = concatEmbaddingOpt.embeddingDimPerChannelLength();
 
-        // attributes.push({ attribute: 'num_channels', value: channel_length });
+        attributes.push({ attribute: 'num_channel_length', value: numChannelLength });
 
+        for (let i = 0; i < numChannelLength; i++) {
+            attributes.push({ attribute: 'num_column_per_channel_' + i, value: concatEmbaddingOpt.numColumnsPerChannel(i) });
+        }
 
-        // attributes.push({ attribute: 'num_columns_per_channel', value: concatEmbaddingOpt.numColumnsPerChannel() });
-        // attributes.push({ attribute: 'num_columns_per_channel_length', value: concatEmbaddingOpt.depthMultiplier() });
-        // attributes.push({ attribute: 'fused_activation_function', value: ActivationFunctionType[concatEmbaddingOpt.fusedActivationFunction()] });
-        // attributes.push({ attribute: 'padding', value: Padding[concatEmbaddingOpt.padding()] });
-        // attributes.push({ attribute: 'stride_h', value: concatEmbaddingOpt.strideH() });
-        // attributes.push({ attribute: 'stride_w', value: concatEmbaddingOpt.strideW() });
+        attributes.push({ attribute: 'num_columns_per_channel_array', value: concatEmbaddingOpt.numColumnsPerChannelArray() });
+
+        attributes.push({ attribute: 'embedding_dim_per_channel_length', value: embeddingDimPerChannelLength });
+
+        for (let i = 0; i < embeddingDimPerChannelLength; i++) {
+            attributes.push({ attribute: 'embedding_dim_per_channel_' + i, value: concatEmbaddingOpt.embeddingDimPerChannel(i) });
+        }
+
+        attributes.push({ attribute: 'embedding_dim_per_channel_array', value: concatEmbaddingOpt.embeddingDimPerChannelArray() });
     }
 
     static getLSHProjectionAttr(operator: Operator, attributes: Array<NODE_ATTRIBUTES>) {
