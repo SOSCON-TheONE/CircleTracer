@@ -8,7 +8,7 @@ export declare type  NODE_PROPERTIES = {
 }
 export declare type  NODE_ATTRIBUTES = {
     attribute: string,
-    value: string|number|boolean|null
+    value: string|number|boolean|Int32Array|null
 }
 export declare type  NODE_INPUT = {
     location: number,
