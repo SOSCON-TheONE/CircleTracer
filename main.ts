@@ -38,7 +38,7 @@ if (subgraph != null) {
             let modelProp: NodeProperties = { type: modelType, location: modelLocation };
     
             //get node attribute
-            let option = BuiltinOperator[operator.builtinOptionsType()];
+            let option = BuiltinOptions[operator.builtinOptionsType()];
             let modelAttribute: Array<NodeAttributes> = [];
 
             caseOptions(option, operator, modelAttribute);
