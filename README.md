@@ -1,6 +1,6 @@
 # Run
 
-1. Locate the `.circle` file in target directory
+1. Locate the `.circle` file in `target` directory
 
 2. Compile typescript to javascript
 
