@@ -1,10 +1,11 @@
 # Run
 
-1. Compile typescript to javascript
+1. Input .circle file in target directory
+
+2. Compile typescript to javascript
 
 ```shell
 tsc main
 ```
 
-2. Execute the main.js file
-
+3. Execute the main.js file
