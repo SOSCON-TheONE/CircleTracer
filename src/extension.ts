@@ -16,9 +16,10 @@
 
 import * as vscode from 'vscode';
 
-import {CodelensProvider} from './Codelens/CodelensProvider';
-import {Project} from './Project';
-import {Utils} from './Utils';
+import { CodelensProvider } from './Codelens/CodelensProvider';
+import { Project } from './Project';
+import { Utils } from './Utils';
+import { NodeGraphPanel } from './Circletracer/NodeGraphPanel';
 
 export function activate(context: vscode.ExtensionContext) {
   console.log('one-vscode activate OK');
@@ -46,14 +47,20 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(disposableOneBarchart);
 
   let disposableOneConfigurationSettings =
-      vscode.commands.registerCommand('onevscode.configuration-settings', () => {
-        console.log('one configuration settings...');
-      });
+    vscode.commands.registerCommand('onevscode.configuration-settings', () => {
+      console.log('one configuration settings...');
+    });
   context.subscriptions.push(disposableOneConfigurationSettings);
 
   let codelens = new CodelensProvider();
   let disposableCodelens = vscode.languages.registerCodeLensProvider('ini', codelens);
   context.subscriptions.push(disposableCodelens);
+
+  let disposableOneCircleTracer = vscode.commands.registerCommand('onevscode.circle-tracer', () => {
+    console.log('one circle tracer...');
+    NodeGraphPanel.createOrShow(context.extensionUri);
+  });
+  context.subscriptions.push(disposableOneCircleTracer);
 }
 
 export function deactivate() {
