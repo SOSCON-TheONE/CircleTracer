@@ -11,6 +11,41 @@ text {
 }
 
 .edgePath path {
-	stroke: #fff;
+	/* stroke: #fff; */
+	stroke: black;
 	stroke-width: 1.5px;
+}
+
+.type, .activation {
+	font-size: 16px;
+	color: black;
+	font-weight: bold;
+}
+
+g.type-MAX_POOL_2D > rect {
+	fill: cadetblue;
+}
+
+g.type-AVERAGE_POOL_2D > rect {
+	fill: cadetblue;
+}
+
+g.type-CONCATENATION > rect {
+	fill: darkgoldenrod
+}
+
+g.type-SOFTMAX > rect {
+	fill: darkred;
+}
+
+g.type-RESHAPE > rect {
+	fill: darksalmon;
+}
+
+g.type-CONV_2D > rect {
+	fill: dodgerblue;
+}
+
+.label {
+	color: black;
 }
