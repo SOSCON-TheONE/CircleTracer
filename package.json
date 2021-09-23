@@ -1,9 +1,86 @@
 {
-  "dependencies": {
-    "@types/node": "^16.7.11",
-    "flatbuffers": "^2.0.3"
+  "name": "one-vscode",
+  "displayName": "one-vscode",
+  "description": "ONE compiler for VSCode",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.46.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onCommand:onevscode.build",
+    "onCommand:onevscode.import",
+    "onCommand:onevscode.barchart",
+    "onCommand:onevscode.configuration-settings"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "onevscode.build",
+        "title": "one build"
+      },
+      {
+        "command": "onevscode.import",
+        "title": "one cfg import"
+      },
+      {
+        "command": "onevscode.barchart",
+        "title": "one visualizer barchart"
+      },
+      {
+        "command": "onevscode.configuration-settings",
+        "title": "one configuration-settings"
+      }
+    ],
+    "languages": [
+      {
+        "id": "ini",
+        "aliases": [
+          "Configuration"
+        ],
+        "extensions": [
+          ".cfg"
+        ]
+      }
+    ],
+    "snippets": [
+      {
+        "language": "ini",
+        "path": "./src/Snippets/one-build.json"
+      },
+      {
+        "language": "ini",
+        "path": "./src/Snippets/onecc.json"
+      },
+      {
+        "language": "ini",
+        "path": "./src/Snippets/tools.json"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js"
   },
   "devDependencies": {
-    "typescript": "^4.4.2"
+    "@types/glob": "^7.1.3",
+    "@types/mocha": "^8.0.4",
+    "@types/node": "^12.11.7",
+    "@types/vscode": "^1.46.0",
+    "@typescript-eslint/eslint-plugin": "^4.9.0",
+    "@typescript-eslint/parser": "^4.9.0",
+    "eslint": "^7.15.0",
+    "glob": "^7.1.6",
+    "ini": "^2.0.0",
+    "mocha": "^8.1.3",
+    "typescript": "^4.1.2",
+    "vscode-test": "^1.4.1"
   }
 }

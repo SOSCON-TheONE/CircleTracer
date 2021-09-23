@@ -1,4 +1,7 @@
+out
 node_modules
-*.circle
-*.tflite
-dist/*
+format.patch
+Makefile
+
+# production for react-app
+build
