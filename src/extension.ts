@@ -15,11 +15,12 @@
  */
 
 import * as vscode from 'vscode';
-
+import { writeFile } from 'fs';
 import { CodelensProvider } from './Codelens/CodelensProvider';
 import { Project } from './Project';
 import { Utils } from './Utils';
 import { NodeGraphPanel } from './Circletracer/NodeGraphPanel';
+import { decoder }  from './CircleReader/CircleReader';
 
 export function activate(context: vscode.ExtensionContext) {
   console.log('one-vscode activate OK');
@@ -58,9 +59,51 @@ export function activate(context: vscode.ExtensionContext) {
 
   let disposableOneCircleTracer = vscode.commands.registerCommand('onevscode.circle-tracer', () => {
     console.log('one circle tracer...');
-    NodeGraphPanel.createOrShow(context.extensionUri);
+    const options: vscode.OpenDialogOptions = {
+      canSelectMany: false,
+      openLabel: 'Open',
+      filters: {
+        'Json files': ['json'],
+        'All files': ['*']
+      }
+    }
+    vscode.window.showOpenDialog(options).then(fileUri=>{
+      if(fileUri&&fileUri[0])
+        NodeGraphPanel.createOrShow(context.extensionUri,fileUri[0].fsPath);
+    });
   });
   context.subscriptions.push(disposableOneCircleTracer);
+  
+  let disposableOneCircleReader = vscode.commands.registerCommand('onevscode.circle-reader', () => {
+    console.log('one circle reader...');
+    const options: vscode.OpenDialogOptions = {
+      canSelectMany: false,
+      openLabel: 'Open',
+      filters: {
+        'Circle files': ['circle'],
+        'All files': ['*']
+      }
+    }
+    vscode.window.showOpenDialog(options).then(fileUri=>{
+      if(fileUri && fileUri[0])  {
+        const circle2json = decoder(fileUri[0].fsPath);
+        const save_options: vscode.OpenDialogOptions = {
+          canSelectMany: false,
+          canSelectFiles: false,
+          canSelectFolders: true,
+          openLabel: 'Open'
+        }
+        vscode.window.showOpenDialog(save_options).then(folderUri=>{
+          if(folderUri&&folderUri[0]){
+            writeFile(folderUri[0].fsPath+'/nodes-sample.json', circle2json, 'utf8', function (err) {
+              console.log(err);
+            });
+          }
+        })
+      }
+    });
+  });
+  context.subscriptions.push(disposableOneCircleReader);
 }
 
 export function deactivate() {
