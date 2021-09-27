@@ -1,20 +1,18 @@
 import * as vscode from 'vscode';
+
 export class NodeGraphPanel {
 	/**
 	 * Track the currently panel. Only allow a single panel to exist at a time.
 	 */
 	public static currentPanel: NodeGraphPanel | undefined;
-	
+
 	public static readonly viewType = 'NodeGraph';
-	
+
 	private readonly _panel: vscode.WebviewPanel;
 	private readonly _extensionUri: vscode.Uri;
-	private static _circle2JsonData: string;
 	private _disposables: vscode.Disposable[] = [];
 
-	public static createOrShow(extensionUri: vscode.Uri, circle2jsonData: string) {
-		this._circle2JsonData = circle2jsonData;
-
+	public static createOrShow(extensionUri: vscode.Uri) {
 		const column = vscode.window.activeTextEditor
 			? vscode.window.activeTextEditor.viewColumn
 			: undefined;
@@ -105,20 +103,27 @@ export class NodeGraphPanel {
 
 	private _getHtmlForWebview(webview: vscode.Webview) {
 		// Local path to main script run in the webview
-		const treeMapOnDisk = vscode.Uri.joinPath(this._extensionUri, 'media/CircleTracer', 'treemap.js');
-		const dagreOnDisk = vscode.Uri.joinPath(this._extensionUri, 'media/CircleTracer', 'dagre-d3.min.js');
+		const treeMapOnDisk = vscode.Uri.joinPath(this._extensionUri, 'src/Circletracer', 'treemap.js');
+		const dagreOnDisk = vscode.Uri.joinPath(this._extensionUri, 'src/Circletracer', 'dagre-d3.min.js');
 
 		// And the uri we use to load this script in the webview
 		const treeMapUri = (treeMapOnDisk).with({ 'scheme': 'vscode-resource' });
 		const dagreUri = (dagreOnDisk).with({ 'scheme': 'vscode-resource' });
 
+		// Local path to json
+		const nodeJsonDataPath = vscode.Uri.joinPath(this._extensionUri, 'src/Circletracer', 'nodes-sample.json');
+
 		// Local path to css styles
-		const styleNodePath = vscode.Uri.joinPath(this._extensionUri, 'media/CircleTracer', 'node-style.css');
+		const styleResetPath = vscode.Uri.joinPath(this._extensionUri, 'media', 'reset.css');
+		const stylesPathMainPath = vscode.Uri.joinPath(this._extensionUri, 'media', 'vscode.css');
+		const styleNodePath = vscode.Uri.joinPath(this._extensionUri, 'src/Circletracer', 'node-style.css');
 
 		// Uri to load styles into webview
+		const stylesResetUri = webview.asWebviewUri(styleResetPath);
+		const stylesMainUri = webview.asWebviewUri(stylesPathMainPath);
+		const nodeJsonDataUri = webview.asWebviewUri(nodeJsonDataPath);
 		const styleNodeUri = webview.asWebviewUri(styleNodePath);
-		
-		
+
 		// Use a nonce to only allow specific scripts to be run
 		const nonce = getNonce();
 
@@ -131,11 +136,13 @@ export class NodeGraphPanel {
 					Use a content security policy to only allow loading images from https or from our extension directory,
 					and only allow scripts that have a specific nonce.
 				-->
-				<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${webview.cspSource}; img-src ${webview.cspSource} https: http: data: blob:; script-src 'unsafe-inline' data: blob: http: https:; connect-src ${webview.cspSource} https:">
+				<meta http-equiv="Content-Security-Policy" content="default-src ${webview.cspSource}; style-src ${webview.cspSource}; img-src ${webview.cspSource} https: http: data: blob:; script-src 'unsafe-inline' http: https:;">
 
 				<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-				<link nonce="${nonce}" href="${styleNodeUri}" rel="stylesheet">
+				<link href="${stylesResetUri}" rel="stylesheet">
+				<link href="${stylesMainUri}" rel="stylesheet">
+				<link href="${styleNodeUri}" rel="stylesheet">
 				<script src="${dagreUri}"></script>
 				<script src="https://code.jquery.com/jquery-latest.min.js" type="text/javascript"></script>
 				<script src="https://d3js.org/d3.v5.min.js"></script>				
@@ -146,9 +153,10 @@ export class NodeGraphPanel {
 			<body>
 				<svg id="svg-canvas"></svg>
 				<script>
-					TreeMap(${NodeGraphPanel._circle2JsonData});
+					d3.json("${nodeJsonDataUri}").then(function (json) {
+						TreeMap(json);
+					});
 				</script>
-
 			</body>
 			</html>`;
 	}
@@ -169,6 +177,7 @@ function getWebviewOptions(extensionUri: vscode.Uri): vscode.WebviewOptions {
 		enableScripts: true,
 
 		// And restrict the webview to only loading content from our extension's `media`, `src/Circletracer` directories.
-		localResourceRoots: [vscode.Uri.joinPath(extensionUri, 'media/CircleTracer')]
+		localResourceRoots: [vscode.Uri.joinPath(extensionUri, 'media')
+			, vscode.Uri.joinPath(extensionUri, 'src/Circletracer')]
 	};
 }
