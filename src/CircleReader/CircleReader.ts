@@ -1,5 +1,3 @@
-
-// import { readFileSync } from '../../node_modules/@types/node/fs';
 import * as vscode from 'vscode';
 import { readFileSync, writeFile } from 'fs';
 import { Node, ModelOperator, NodeProperties, NodeAttributes, NodeInput, NodeOutput } from './type/types'
