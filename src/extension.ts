@@ -19,8 +19,8 @@ import { writeFile } from 'fs';
 import { CodelensProvider } from './Codelens/CodelensProvider';
 import { Project } from './Project';
 import { Utils } from './Utils';
-import { NodeGraphPanel } from './Circletracer/NodeGraphPanel';
-import { decoder }  from './CircleReader/CircleReader';
+import { Circletracer } from './Circletracer';
+import { decoder } from './Circlereader/Circlereader';
 
 export function activate(context: vscode.ExtensionContext) {
   console.log('one-vscode activate OK');
@@ -67,10 +67,10 @@ export function activate(context: vscode.ExtensionContext) {
         'All files': ['*']
       }
     }
-    vscode.window.showOpenDialog(options).then(fileUri=>{
-      if(fileUri && fileUri[0])  {
+    vscode.window.showOpenDialog(options).then(fileUri => {
+      if (fileUri && fileUri[0]) {
         const circle2json = decoder(fileUri[0].fsPath);
-        NodeGraphPanel.createOrShow(context.extensionUri,circle2json);
+        Circletracer.createOrShow(context.extensionUri, circle2json);
       }
     });
   });
