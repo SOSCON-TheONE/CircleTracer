@@ -63,23 +63,6 @@ export function activate(context: vscode.ExtensionContext) {
       canSelectMany: false,
       openLabel: 'Open',
       filters: {
-        'Json files': ['json'],
-        'All files': ['*']
-      }
-    }
-    vscode.window.showOpenDialog(options).then(fileUri=>{
-      if(fileUri&&fileUri[0])
-        NodeGraphPanel.createOrShow(context.extensionUri,fileUri[0].fsPath);
-    });
-  });
-  context.subscriptions.push(disposableOneCircleTracer);
-  
-  let disposableOneCircleReader = vscode.commands.registerCommand('onevscode.circle-reader', () => {
-    console.log('one circle reader...');
-    const options: vscode.OpenDialogOptions = {
-      canSelectMany: false,
-      openLabel: 'Open',
-      filters: {
         'Circle files': ['circle'],
         'All files': ['*']
       }
@@ -87,23 +70,11 @@ export function activate(context: vscode.ExtensionContext) {
     vscode.window.showOpenDialog(options).then(fileUri=>{
       if(fileUri && fileUri[0])  {
         const circle2json = decoder(fileUri[0].fsPath);
-        const save_options: vscode.OpenDialogOptions = {
-          canSelectMany: false,
-          canSelectFiles: false,
-          canSelectFolders: true,
-          openLabel: 'Open'
-        }
-        vscode.window.showOpenDialog(save_options).then(folderUri=>{
-          if(folderUri&&folderUri[0]){
-            writeFile(folderUri[0].fsPath+'/nodes-sample.json', circle2json, 'utf8', function (err) {
-              console.log(err);
-            });
-          }
-        })
+        NodeGraphPanel.createOrShow(context.extensionUri,circle2json);
       }
     });
   });
-  context.subscriptions.push(disposableOneCircleReader);
+  context.subscriptions.push(disposableOneCircleTracer);
 }
 
 export function deactivate() {
