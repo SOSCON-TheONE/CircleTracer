@@ -14,8 +14,7 @@
     "onCommand:onevscode.import",
     "onCommand:onevscode.barchart",
     "onCommand:onevscode.configuration-settings",
-    "onCommand:onevscode.circle-tracer",
-    "onCommand:onevscode.circle-reader"
+    "onCommand:onevscode.circle-tracer"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -39,10 +38,6 @@
       {
         "command": "onevscode.circle-tracer",
         "title": "one visualizer circle tracer"
-      },
-      {
-        "command": "onevscode.circle-reader",
-        "title": "one circle reader"
       }
     ],
     "languages": [
