@@ -156,7 +156,7 @@ export class Circletracer {
                             </nav>
                             <div id="wrapper"></div>
                         </div>
-                        <div class="w3-sidebar w3-bar-block w3-card w3-animate-right" style="display:none;right:0;" id="detail">
+                        <div class="sidebar sidebar-block card animate-right" id="detail">
                             <h1 class="detail-title">NODE PROPERTIES</h1>
                             <a class="close-button" onclick="closeDetail()">x</a>
                             <div id="node-properties-content" class="detail-content"></div>

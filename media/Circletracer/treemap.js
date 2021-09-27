@@ -10,17 +10,16 @@ function TreeMap(json) {
 			return {};
 		});
 	let typeArray = ['CONCATENATION', 'MAX_POOL_2D', 'AVERAGE_POOL_2D', 'SOFTMAX']; // 노드에 type만 있는 경우
-	// let nodes = [];
 	g.setNode(0, { label: "input", class: "type-input" });
 	json.forEach(element => {
-		let name = element.properties.type;
+		let type = element.properties.type;
 		let myIndex = element.outputs[0].location;
 		let parentsIndex = [];
 		let location = element.properties.location;
 		let attributes = element.attributes;
 		let inputs = element.inputs;
 		let outputs = element.outputs;
-		if (name == "CONCATENATION") { //multiple parents			
+		if (type == "CONCATENATION") { //multiple parents			
 			element.inputs.forEach(input => {
 				parentsIndex.push(input);
 			});
@@ -29,8 +28,8 @@ function TreeMap(json) {
 		}
 		let node = {
 			'index': myIndex,
-			'label': name,
-			'class': "type-" + name,
+			'type': type,
+			'class': "type-" + type,
 			'parents': parentsIndex,
 			'location': location,
 			'attributes': attributes,
@@ -38,8 +37,8 @@ function TreeMap(json) {
 			'outputs': outputs
 		};
 
-		let label = `<p class='type'>${node.label}</p>`;
-		if (name == 'RESHAPE') {
+		let label = `<p class='type'>${type}</p>`;
+		if (type == 'RESHAPE') {
 			node['data'] = element.inputs[0];
 			node['shape'] = element.inputs[1];
 
@@ -52,7 +51,7 @@ function TreeMap(json) {
 
 			label = label + `<p><label><b>shape</b></label><span>&lt;${shape}&gt;</span></p>`;
 
-		} else if (!typeArray.includes(name)) {
+		} else if (!typeArray.includes(type)) {
 			node['filter'] = element.inputs[1];
 			node['bias'] = element.inputs[2];
 
@@ -167,7 +166,7 @@ function scrolled() {
 }
 
 function openDetail() {
-	document.querySelector('#main').style.marginLeft = "35%";
+	document.querySelector('#main').style.marginRight = "35%";
 	document.querySelector('#detail').style.width = "35%";
 	document.querySelector("#detail").style.display = "block";
 }
@@ -186,7 +185,7 @@ function createDetailContent(id, g) {
 	nodes.forEach(node => {
 		if (node.index == id) {
 			for (let key in node) {
-				if (key == 'label') {
+				if (key == 'type') {
 					let name = document.createElement('div');
 					name.setAttribute("class", "detail-content-name detail-content-list");
 					let label = document.createElement('label');

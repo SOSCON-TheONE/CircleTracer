@@ -20,7 +20,7 @@ import { CodelensProvider } from './Codelens/CodelensProvider';
 import { Project } from './Project';
 import { Utils } from './Utils';
 import { Circletracer } from './Circletracer';
-import { decoder } from './CircleReader/CircleReader';
+import { decoder } from './Circlereader/Circlereader';
 
 export function activate(context: vscode.ExtensionContext) {
   console.log('one-vscode activate OK');
