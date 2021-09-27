@@ -114,13 +114,9 @@ export class Circletracer {
 
         // Local path to css styles
         const styleNodePath = vscode.Uri.joinPath(this._extensionUri, 'media/Circletracer', 'node-style.css');
-        const styleResetPath = vscode.Uri.joinPath(this._extensionUri, 'media', 'reset.css');
-        const styleVscodePath = vscode.Uri.joinPath(this._extensionUri, 'media', 'vscode.css');
 
         // Uri to load styles into webview
         const styleNodeUri = webview.asWebviewUri(styleNodePath);
-        const styleResetUri = webview.asWebviewUri(styleResetPath);
-        const styleVscodeUri = webview.asWebviewUri(styleVscodePath);
 
 
         // Use a nonce to only allow specific scripts to be run
@@ -140,8 +136,6 @@ export class Circletracer {
 				<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 				<link nonce="${nonce}" href="${styleNodeUri}" rel="stylesheet">
-                <link nonce="${nonce}" href="${styleResetUri}" rel="stylesheet">
-				<link nonce="${nonce}" href="${styleVscodeUri}" rel="stylesheet">
 				<script src="${dagreUri}"></script>
 				<script src="https://code.jquery.com/jquery-latest.min.js" type="text/javascript"></script>
 				<script src="https://d3js.org/d3.v5.min.js"></script>				
