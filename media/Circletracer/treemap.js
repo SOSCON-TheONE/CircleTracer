@@ -1,4 +1,3 @@
-let nodes = [];
 let circleJson, durCircleJson;
 function TreeMap(json) {
 	console.log(json);
@@ -12,7 +11,7 @@ function TreeMap(json) {
 		.setDefaultEdgeLabel(function () {
 			return {};
 		});
-	let typeArray = ['CONCATENATION', 'MAX_POOL_2D', 'AVERAGE_POOL_2D', 'SOFTMAX']; // 노드에 type만 있는 경우
+	let nodes = [];
 	let inputNode, outputNode;
 
 	g.setNode(0, { label: "input", class: "type-input" });
@@ -24,13 +23,14 @@ function TreeMap(json) {
 		let attributes = element.attributes;
 		let inputs = element.inputs;
 		let outputs = element.outputs;
-		if (type == "CONCATENATION") { //multiple parents			
-			element.inputs.forEach(input => {
+		if (type === "CONCATENATION") { //multiple parents			
+			inputs.forEach(input => {
 				parentsIndex.push(input);
 			});
 		} else {
-			parentsIndex.push(element.inputs[0]);
+			parentsIndex.push(inputs[0]);
 		}
+
 		let node = {
 			'index': myIndex,
 			'type': type,
@@ -43,45 +43,39 @@ function TreeMap(json) {
 		};
 
 		let label = `<p class='type'>${type}</p>`;
-		if (type == 'RESHAPE') {
-			node['data'] = element.inputs[0];
-			node['shape'] = element.inputs[1];
 
-			let shape = '';
-			let currentType = element.inputs[1].type;
-			for (key in currentType) {
-				shape = shape + currentType[key] + 'x';
-			}
-			shape = shape.slice(0, -1);
+		// inputs label create
+		if (type !== "CONCATENATION") {
+			inputs.forEach((input, checkIdx) => {
+				if (checkIdx === 0) {
+					return;
+				}
 
-			label = label + `<p><label><b>shape</b></label><span>&lt;${shape}&gt;</span></p>`;
+				let typeStr = '';
+				let currentType = input.type;
+				for (key in currentType) {
+					typeStr += currentType[key] + 'x';
+				}
+				typeStr = typeStr.slice(0, -1);
 
-		} else if (!typeArray.includes(type)) {
-			node['filter'] = element.inputs[1];
-			node['bias'] = element.inputs[2];
-
-			let filter = '';
-			let currentType = element.inputs[1].type;
-			for (key in currentType) {
-				filter = filter + currentType[key] + 'x';
-			}
-			filter = filter.slice(0, -1);
-
-			let bias = '';
-			currentType = element.inputs[2].type;
-			for (key in currentType) {
-				bias = bias + currentType[key] + 'x';
-			}
-			bias = bias.slice(0, -1);
-
-			label = label + `<p><label><b>filter</b></label><span>&lt;${filter}&gt;</span></p>`;
-			label = label + `<p><label><b>bias</b></label><span>&lt;${bias}&gt;</span></p>`;
+				label += `<p><label><b>input${checkIdx}</b></label><span>&lt;${typeStr}&gt;</span></p>`;
+			})
 
 			attributes.forEach(attr => {
-				if (attr['attribute'] == 'fused_activation_function') {
-					label = label + `<p class='activation'>${attr['value']}</p>`
+				if (attr['attribute'] === 'fused_activation_function' && attr['value'] !== 'NONE') {
+					label += `<p class='activation'>${attr['value']}</p>`
 				}
 			})
+		}
+
+		// if element has duration
+		if (element.hasOwnProperty('duration')) {
+			let timeUnit = element.duration.timeUnit;
+			let dur1 = element.duration.dur1;
+			let dur2 = element.duration.dur2;
+
+			label += `<p class='duration-title'>DURATION</p>`;
+			label += `<p class='duration'>${dur1.toFixed(4)} ${timeUnit} <b>&roarr;</b> ${dur2.toFixed(4)} ${timeUnit}</p>`;
 		}
 
 		//First node logic
@@ -105,7 +99,7 @@ function TreeMap(json) {
 			outputParentIndex.push({
 				location: myIndex,
 			});
-			
+
 			inputNode.outputs.push(outputs[0]);
 
 			outputNode = {
@@ -119,9 +113,9 @@ function TreeMap(json) {
 
 			nodes.push(inputNode);
 			nodes.push(outputNode);
-			g.setNode(outputNode.index, { lavelType: 'html', label: outputNode.label, class: outputNode.class });
+			g.setNode(outputNode.index, { labelType: 'html', label: outputNode.label, class: outputNode.class });
 		}
-		
+
 		nodes.push(node);
 		g.setNode(node.index, { labelType: 'html', label: label, class: node.class });
 	});
@@ -132,14 +126,14 @@ function TreeMap(json) {
 		node.rx = node.ry = 5;
 	});
 
-	nodes.forEach(element => {
-		let index = element.index;
-		let parents = element.parents;
+	nodes.forEach(node => {
+		let index = node.index;
+		let parents = node.parents;
 		parents.forEach(parent => {
 			let label = `<p class="edge-label">`;
 			let currentType = parent.type;
 			for (key in currentType) {
-				label = label + currentType[key] + 'x';
+				label += currentType[key] + 'x';
 			}
 			label = label.slice(0, -1);
 			label += `</p>`
@@ -152,7 +146,6 @@ function TreeMap(json) {
 	let render = new dagreD3.render();
 
 	let svg = d3.select('#wrapper').append("svg");
-
 	let inner = svg.append("g");
 
 	// Set up zoom support
@@ -167,7 +160,7 @@ function TreeMap(json) {
 	svg.attr("width", g.graph().width + 300);
 	svg.attr("height", g.graph().height);
 	svg.selectAll("g.node")
-		.on("click", (id) => createDetailContent(id, g));
+		.on("click", (id) => createDetailContent(nodes, id, g));
 }
 
 function zoomed(inner, g) {
@@ -220,7 +213,7 @@ function closeDetail() {
 	document.querySelector("#detail").style.display = "none";
 }
 
-function createDetailContent(id, g) {
+function createDetailContent(nodes, id, g) {
 	var _node = g.node(id);
 	console.log("Clicked " + id, _node);
 
@@ -228,22 +221,7 @@ function createDetailContent(id, g) {
 	nodes.forEach(node => {
 		if (node.index == id) {
 			for (let key in node) {
-				if (key == 'type') {
-					let name = document.createElement('div');
-					name.setAttribute("class", "detail-content-name detail-content-list");
-					let label = document.createElement('label');
-					label.innerHTML = key;
-					name.appendChild(label);
-
-					let value = document.createElement('div');
-					value.setAttribute("class", "detail-content-item detail-content-list");
-					value.innerHTML = node[key];
-
-					document.querySelector('#node-properties-content').appendChild(name);
-					document.querySelector('#node-properties-content').appendChild(value);
-				}
-
-				if (key == 'location') {
+				if (key === 'type' || key === 'location') {
 					let name = document.createElement('div');
 					name.setAttribute("class", "detail-content-name detail-content-list");
 					let label = document.createElement('label');
@@ -276,16 +254,16 @@ function createDetailContent(id, g) {
 				}
 
 				if (key == 'inputs') {
-					node[key].forEach(element => {
+					node[key].forEach((input, idx) => {
 						let name = document.createElement('div');
 						name.setAttribute("class", "detail-content-name detail-content-list");
 						let label = document.createElement('label');
-						label.innerHTML = 'input';
+						label.innerHTML = `input ${idx}`;
 						name.appendChild(label);
 
 						let value = document.createElement('div');
 						value.setAttribute("class", "detail-content-item detail-content-list");
-						value.innerHTML = `name: ${element['name']}`;
+						value.innerHTML = `name: ${input['name']}`;
 
 						document.querySelector('#inputs-content').appendChild(name);
 						document.querySelector('#inputs-content').appendChild(value);
@@ -297,7 +275,7 @@ function createDetailContent(id, g) {
 
 						value = document.createElement('div');
 						value.setAttribute("class", "detail-content-item detail-content-list");
-						value.innerHTML = `type: ${getTypeArray(element['type'])}`;
+						value.innerHTML = `type: ${getTypeArray(input['type'])}`;
 
 						document.querySelector('#inputs-content').appendChild(name);
 						document.querySelector('#inputs-content').appendChild(value);
@@ -309,7 +287,7 @@ function createDetailContent(id, g) {
 
 						value = document.createElement('div');
 						value.setAttribute("class", "detail-content-item detail-content-list");
-						value.innerHTML = `location: ${element['location']}`;
+						value.innerHTML = `location: ${input['location']}`;
 
 						document.querySelector('#inputs-content').appendChild(name);
 						document.querySelector('#inputs-content').appendChild(value);
@@ -317,7 +295,7 @@ function createDetailContent(id, g) {
 				}
 
 				if (key == 'outputs') {
-					node[key].forEach(element => {
+					node[key].forEach(output => {
 						let name = document.createElement('div');
 						name.setAttribute("class", "detail-content-name detail-content-list");
 						let label = document.createElement('label');
@@ -326,7 +304,7 @@ function createDetailContent(id, g) {
 
 						let value = document.createElement('div');
 						value.setAttribute("class", "detail-content-item detail-content-list");
-						value.innerHTML = `name: ${element['name']}`;
+						value.innerHTML = `name: ${output['name']}`;
 
 						document.querySelector('#outputs-content').appendChild(name);
 						document.querySelector('#outputs-content').appendChild(value);
@@ -338,7 +316,7 @@ function createDetailContent(id, g) {
 
 						value = document.createElement('div');
 						value.setAttribute("class", "detail-content-item detail-content-list");
-						value.innerHTML = `type: ${getTypeArray(element['type'])}`;
+						value.innerHTML = `type: ${getTypeArray(output['type'])}`;
 
 						document.querySelector('#outputs-content').appendChild(name);
 						document.querySelector('#outputs-content').appendChild(value);
@@ -350,7 +328,7 @@ function createDetailContent(id, g) {
 
 						value = document.createElement('div');
 						value.setAttribute("class", "detail-content-item detail-content-list");
-						value.innerHTML = `location: ${element['location']}`;
+						value.innerHTML = `location: ${output['location']}`;
 
 						document.querySelector('#outputs-content').appendChild(name);
 						document.querySelector('#outputs-content').appendChild(value);
