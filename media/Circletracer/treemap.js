@@ -1,4 +1,3 @@
-// let nodes = [];
 let circleJson, durCircleJson;
 function TreeMap(json) {
 	console.log(json);
