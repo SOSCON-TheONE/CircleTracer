@@ -13,6 +13,8 @@ function TreeMap(json) {
 			return {};
 		});
 	let typeArray = ['CONCATENATION', 'MAX_POOL_2D', 'AVERAGE_POOL_2D', 'SOFTMAX']; // 노드에 type만 있는 경우
+	let inputNode, outputNode;
+
 	g.setNode(0, { label: "input", class: "type-input" });
 	json.forEach((element, idx) => {
 		let type = element.properties.type;
@@ -82,28 +84,44 @@ function TreeMap(json) {
 			})
 		}
 
+		//First node logic
 		if (idx === 0) {
+			inputNode = {
+				'index': 0,
+				'class': 'type-input',
+				'inputs': [element.inputs[0]],
+				'outputs': [],
+				'parents': []
+			}
+
 			g.setNode(0, { label: 'input', class: 'type-input' });
 		}
 
-		// Last Node Logic
-		// if (idx === json.length - 1) {
-		//   let outputParentIndex = [];
-		//   let name = outputs[0].name;
+		// Last node logic
+		if (idx === json.length - 1) {
+			let outputParentIndex = [];
+			let name = outputs[0].name;
 
-		//   outputParentIndex.push({
-		//     location: myIndex,
-		//   });
+			outputParentIndex.push({
+				location: myIndex,
+			});
+			
+			inputNode.outputs.push(outputs[0]);
 
-		//   let outputNode = {
-		//     index: myIndex + 1,
-		//     label: name,
-		//     class: 'type-' + name,
-		//     parents: outputParentIndex,
-		//   };
+			outputNode = {
+				'label': name,
+				'class': 'type-' + name,
+				'parents': outputParentIndex,
+				'inputs': inputNode.inputs,
+				'outputs': [outputs[0]],
+				'index': myIndex + 1
+			};
 
-		//   nodes.push(outputNode);
-		// }
+			nodes.push(inputNode);
+			nodes.push(outputNode);
+			g.setNode(outputNode.index, { lavelType: 'html', label: outputNode.label, class: outputNode.class });
+		}
+		
 		nodes.push(node);
 		g.setNode(node.index, { labelType: 'html', label: label, class: node.class });
 	});
