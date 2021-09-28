@@ -10,6 +10,14 @@ text {
     stroke-width: 1.5px;
 }
 
+/* .node rect:before {
+    content: 'hi';
+} */
+
+/* .node.change:after {
+    content: 'hi';
+} */
+
 .edgePath path {
     /* stroke: #fff; */
     stroke: black;
@@ -19,11 +27,11 @@ text {
 .activation,
 .type {
     font-size: 16px;
-    color: mistyrose !important;
+    /* color: black !important; */
     font-weight: bold;
 }
 
-g.type-MAX_POOL_2D > rect {
+/* g.type-MAX_POOL_2D > rect {
     fill: cadetblue;
 }
 
@@ -45,7 +53,7 @@ g.type-RESHAPE > rect {
 
 g.type-CONV_2D > rect {
     fill: dodgerblue;
-}
+} */
 
 .label {
     color: black;
@@ -56,11 +64,11 @@ g.type-CONV_2D > rect {
 }
 
 .type {
-    border-bottom: 2px solid white;
+    border-bottom: 2px solid grey;
 }
 
 .activation {
-    border-top: 2px solid white;
+    border-top: 2px solid grey;
 }
 
 #wrapper {
@@ -118,9 +126,9 @@ g.node {
     cursor: pointer;
 }
 
-g.node p {
+/* g.node p {
     color: white;
-}
+} */
 
 /* slidebar */
 .sidebar {

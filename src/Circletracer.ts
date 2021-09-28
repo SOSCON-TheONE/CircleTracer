@@ -140,7 +140,6 @@ export class Circletracer {
 				<link nonce="${nonce}" href="${styleNodeUri}" rel="stylesheet">
 				<script src="${dagreUri}"></script>
                 <script src="${loadFileUri}"></script>
-				<script src="https://code.jquery.com/jquery-latest.min.js" type="text/javascript"></script>
 				<script src="https://d3js.org/d3.v5.min.js"></script>				
 				<script src="${treeMapUri}"></script>
 				<title>Node Graph Visualization</title>
