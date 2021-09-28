@@ -13,6 +13,9 @@ function TreeMap(json) {
 			return {};
 		});
 	let nodes = [];
+	let inputNode, outputNode;
+
+	g.setNode(0, { label: "input", class: "type-input" });
 	json.forEach((element, idx) => {
 		let type = element.properties.type;
 		let myIndex = element.outputs[0].location;
@@ -66,28 +69,54 @@ function TreeMap(json) {
 			})
 		}
 
+		// if element has duration
+		if (element.hasOwnProperty('duration')) {
+			let timeUnit = element.duration.timeUnit;
+			let dur1 = element.duration.dur1;
+			let dur2 = element.duration.dur2;
+
+			label += `<p class='duration-title'>DURATION</p>`;
+			label += `<p class='duration'>${dur1.toFixed(4)} ${timeUnit} <b>&roarr;</b> ${dur2.toFixed(4)} ${timeUnit}</p>`;
+		}
+
+		//First node logic
 		if (idx === 0) {
+			inputNode = {
+				'index': 0,
+				'class': 'type-input',
+				'inputs': [element.inputs[0]],
+				'outputs': [],
+				'parents': []
+			}
+
 			g.setNode(0, { label: 'input', class: 'type-input' });
 		}
 
-		// Last Node Logic
-		// if (idx === json.length - 1) {
-		//   let outputParentIndex = [];
-		//   let name = outputs[0].name;
+		// Last node logic
+		if (idx === json.length - 1) {
+			let outputParentIndex = [];
+			let name = outputs[0].name;
 
-		//   outputParentIndex.push({
-		//     location: myIndex,
-		//   });
+			outputParentIndex.push({
+				location: myIndex,
+			});
 
-		//   let outputNode = {
-		//     index: myIndex + 1,
-		//     label: name,
-		//     class: 'type-' + name,
-		//     parents: outputParentIndex,
-		//   };
+			inputNode.outputs.push(outputs[0]);
 
-		//   nodes.push(outputNode);
-		// }
+			outputNode = {
+				'label': name,
+				'class': 'type-' + name,
+				'parents': outputParentIndex,
+				'inputs': inputNode.inputs,
+				'outputs': [outputs[0]],
+				'index': myIndex + 1
+			};
+
+			nodes.push(inputNode);
+			nodes.push(outputNode);
+			g.setNode(outputNode.index, { labelType: 'html', label: outputNode.label, class: outputNode.class });
+		}
+
 		nodes.push(node);
 		g.setNode(node.index, { labelType: 'html', label: label, class: node.class });
 	});

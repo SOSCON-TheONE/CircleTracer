@@ -12,13 +12,13 @@ text {
 }
 
 .edgePath path {
-    /* stroke: #fff; */
     stroke: var(--vscode-foreground, gray)k;
     stroke-width: 1.5px;
 }
 
 .activation,
-.type {
+.type,
+.duration-title {
     font-size: 16px;
     font-weight: bold;
 }
@@ -32,10 +32,12 @@ text {
 }
 
 .type {
+    padding-bottom: 7px;
     border-bottom: 2px solid var(--vscode-foreground, gray);
 }
 
-.activation {
+.activation, .duration-title {
+    padding-top: 7px;
     border-top: 2px solid var(--vscode-foreground, gray);
 }
 
@@ -76,7 +78,7 @@ button {
     font-size: small;
 }
 
-button:hover {
+button:hover:enabled {
     background-color: var(--vscode-button-hoverBackground);
 }
 
@@ -142,6 +144,7 @@ g.node {
     line-height: 1.25;
     margin-top: 16px;
     margin-bottom: 16px;
+    padding-bottom: 3px;
     border-bottom: 1px solid var(--vscode-foreground, gray);
     display: block;
     cursor: default;

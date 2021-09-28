@@ -1,11 +1,21 @@
+let jsonLoadCheck = 0;
 function openFileSelector(flag) {
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = 'text/plain';
     input.onchange = (event) => {
+        setFileName(event.target.files[0].name, flag);
         processFile(event.target.files[0], flag);
     };
     input.click();
+}
+
+function setFileName(name, flag) {
+    if (flag === '1') {
+        document.querySelector('#first-json-btn').innerHTML = name;
+    } else if (flag === '2') {
+        document.querySelector('#second-json-btn').innerHTML = name;
+    }
 }
 
 function processFile(file, flag) {
@@ -18,6 +28,14 @@ function processFile(file, flag) {
 }
 
 function processData(timeUnit, traceEvents, flag) {
+    if (flag === '1') {
+        ++jsonLoadCheck;
+        document.querySelector('#first-json-btn').disabled = true;
+    } else if (flag === '2') {
+        ++jsonLoadCheck;
+        document.querySelector('#second-json-btn').disabled = true;
+    }
+
     traceEvents.forEach((elem) => {
         if (elem.args !== undefined && elem.args.origin !== undefined) {
             let origins = elem.args.origin.split(',');
@@ -41,5 +59,39 @@ function processData(timeUnit, traceEvents, flag) {
         }
     });
 
+    // graph reset
+    if (jsonLoadCheck == 2) {
+        let graphWrapper = document.querySelector('#wrapper');
+
+        while (graphWrapper.hasChildNodes()) {
+            graphWrapper.removeChild(graphWrapper.firstChild);
+        }
+
+        TreeMap(durCircleJson);
+    }
+
     console.log(durCircleJson);
+}
+
+function reset() {
+    jsonLoadCheck = 0;
+
+    // button reset
+    let firstJsonBtn = document.querySelector('#first-json-btn');
+    let secondJsonBtn = document.querySelector('#second-json-btn');
+    firstJsonBtn.disabled = false;
+    secondJsonBtn.disabled = false;
+
+    firstJsonBtn.innerHTML = 'Load First Json File';
+    secondJsonBtn.innerHTML = 'Load Second Json File';
+
+    if (jsonLoadCheck == 2) {
+        let graphWrapper = document.querySelector('#wrapper');
+
+        while (graphWrapper.hasChildNodes()) {
+            graphWrapper.removeChild(graphWrapper.firstChild);
+        }
+
+        TreeMap(circleJson);
+    }
 }
