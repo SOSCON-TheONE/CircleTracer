@@ -1,4 +1,6 @@
 import * as vscode from 'vscode';
+import * as fs from 'fs';
+
 export class Circletracer {
     /**
      * Track the currently panel. Only allow a single panel to exist at a time.
@@ -9,11 +11,11 @@ export class Circletracer {
 
     private readonly _panel: vscode.WebviewPanel;
     private readonly _extensionUri: vscode.Uri;
-    private static _circle2JsonData: string;
+    private static _circleToJsonData: string;
     private _disposables: vscode.Disposable[] = [];
 
-    public static createOrShow(extensionUri: vscode.Uri, circle2jsonData: string) {
-        this._circle2JsonData = circle2jsonData;
+    public static createOrShow(extensionUri: vscode.Uri, circleToJson: string) {
+        this._circleToJsonData = circleToJson;
 
         const column = vscode.window.activeTextEditor
             ? vscode.window.activeTextEditor.viewColumn
@@ -103,84 +105,45 @@ export class Circletracer {
         return;
     }
 
+    private getMediaPath(file: string) {
+        return vscode.Uri.joinPath(this._extensionUri, 'media/Circletracer', file);
+    }
+
     private _getHtmlForWebview(webview: vscode.Webview) {
-        // Local path to main script run in the webview
-        const loadFileOnDisk = vscode.Uri.joinPath(this._extensionUri, 'media/Circletracer', 'loadfile.js');
-        const treeMapOnDisk = vscode.Uri.joinPath(this._extensionUri, 'media/Circletracer', 'treemap.js');
-        const dagreOnDisk = vscode.Uri.joinPath(this._extensionUri, 'media/Circletracer', 'dagre-d3.min.js');
-
-        // And the uri we use to load this script in the webview
-        const loadFileUri = (loadFileOnDisk).with({ 'scheme': 'vscode-resource' });
-        const treeMapUri = (treeMapOnDisk).with({ 'scheme': 'vscode-resource' });
-        const dagreUri = (dagreOnDisk).with({ 'scheme': 'vscode-resource' });
-
-        // Local path to css styles
-        const styleNodePath = vscode.Uri.joinPath(this._extensionUri, 'media/Circletracer', 'node-style.css');
-
-        // Uri to load styles into webview
-        const styleNodeUri = webview.asWebviewUri(styleNodePath);
-
-
         // Use a nonce to only allow specific scripts to be run
         const nonce = getNonce();
 
-        return `<!DOCTYPE html>
-			<html lang="en">
-			<head>
-				<meta charset="UTF-8">
+        // Local path to main js script run in the webview
+        // And the uri we use to load this script in the webview
+        const loadFileOnDisk = this.getMediaPath('loadfile.js');
+        const loadFileUri = loadFileOnDisk.with({ 'scheme': 'vscode-resource' });
 
-				<!--
-					Use a content security policy to only allow loading images from https or from our extension directory,
-					and only allow scripts that have a specific nonce.
-				-->
-				<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${webview.cspSource}; img-src ${webview.cspSource} https: http: data: blob:; script-src 'unsafe-inline' data: blob: http: https:; connect-src ${webview.cspSource} https:">
+        const treeMapOnDisk = this.getMediaPath('treemap.js');
+        const treeMapUri = treeMapOnDisk.with({ 'scheme': 'vscode-resource' });
 
-				<meta name="viewport" content="width=device-width, initial-scale=1.0">
+        const dagreOnDisk = this.getMediaPath('dagre-d3.min.js');
+        const dagreUri = dagreOnDisk.with({ 'scheme': 'vscode-resource' });
 
-				<link nonce="${nonce}" href="${styleNodeUri}" rel="stylesheet">
-				<script src="${dagreUri}"></script>
-                <script src="${loadFileUri}"></script>
-				<script src="https://d3js.org/d3.v5.min.js"></script>				
-				<script src="${treeMapUri}"></script>
-				<title>Node Graph Visualization</title>
-			</head>
-			
-			<body>
-                <div id="root">
-                    <main>
-                        <h1 id="title">Circle Tracer</h1>
-                        <div id="main">
-                            <nav>
-                                <div class="left-btns">
-                                    <button class="json-load-btn" onclick="openFileSelector('1');">Load First Json File</button>
-                                    <button class="json-load-btn" onclick="openFileSelector('2');">Load Second Json File</button>
-                                </div>
-                            </nav>
-                            <div id="wrapper"></div>
-                        </div>
-                        <div class="sidebar sidebar-block card animate-right" id="detail">
-                            <h1 class="detail-title">NODE PROPERTIES</h1>
-                            <a class="close-button" onclick="closeDetail()">x</a>
-                            <div id="node-properties-content" class="detail-content"></div>
-                            <div class="detail-header">ATTRIBUTES</div>
-                            <div id="attributes-content" class="detail-content">
-                                <!-- <div class="detail-content-name detail-content-list">
-                                    <label>type</label>
-                                </div>
-                                <div class="detail-content-item detail-content-list">Conv2D</div> -->
-                            </div>
-                            <div class="detail-header">INPUTS</div>
-                            <div id="inputs-content" class="detail-content"></div>
-                            <div class="detail-header">OUTPUTS</div>
-                            <div id="outputs-content" class="detail-content"></div>
-                        </div>
-                    </main>
-                </div>
-				<script>
-					TreeMap(${Circletracer._circle2JsonData});
-				</script>
-			</body>
-			</html>`;
+        // Local path to css styles
+        // Uri to load styles into webview
+        const stylePath = this.getMediaPath('style.css');
+        const styleUri = webview.asWebviewUri(stylePath);
+
+        // import html
+        const htmlPath = this.getMediaPath('index.html');
+        let html = fs.readFileSync(htmlPath.fsPath, { encoding: 'utf-8' });
+
+        // Apply js and css to html
+        html = html.replace(/_nonce/g, `${nonce}`);
+        html = html.replace(/_styleUri/g, `${styleUri}`);
+        html = html.replace(/_webview.cspSource/g, `${webview.cspSource}`);
+        html = html.replace(/_loadFileUri/g, `${loadFileUri}`);
+        html = html.replace(/_treeMapUri/g, `${treeMapUri}`);
+        html = html.replace(/_dagreUri/g, `${dagreUri}`);
+        html = html.replace(/_dagreUri/g, `${dagreUri}`);
+        html = html.replace(/_Circletracer._circleToJsonData/g, `${`${Circletracer._circleToJsonData}`}`);
+
+        return html;
     }
 }
 
