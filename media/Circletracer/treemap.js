@@ -1,6 +1,9 @@
 let nodes = [];
+let circleJson, durCircleJson;
 function TreeMap(json) {
 	console.log(json);
+	circleJson = json;
+	durCircleJson = json;
 	let g = new dagreD3.graphlib.Graph()
 		.setGraph({})
 		.setDefaultNodeLabel(function () {
@@ -11,7 +14,7 @@ function TreeMap(json) {
 		});
 	let typeArray = ['CONCATENATION', 'MAX_POOL_2D', 'AVERAGE_POOL_2D', 'SOFTMAX']; // 노드에 type만 있는 경우
 	g.setNode(0, { label: "input", class: "type-input" });
-	json.forEach(element => {
+	json.forEach((element, idx) => {
 		let type = element.properties.type;
 		let myIndex = element.outputs[0].location;
 		let parentsIndex = [];
@@ -79,6 +82,28 @@ function TreeMap(json) {
 			})
 		}
 
+		if (idx === 0) {
+			g.setNode(0, { label: 'input', class: 'type-input' });
+		}
+
+		// Last Node Logic
+		// if (idx === json.length - 1) {
+		//   let outputParentIndex = [];
+		//   let name = outputs[0].name;
+
+		//   outputParentIndex.push({
+		//     location: myIndex,
+		//   });
+
+		//   let outputNode = {
+		//     index: myIndex + 1,
+		//     label: name,
+		//     class: 'type-' + name,
+		//     parents: outputParentIndex,
+		//   };
+
+		//   nodes.push(outputNode);
+		// }
 		nodes.push(node);
 		g.setNode(node.index, { labelType: 'html', label: label, class: node.class });
 	});

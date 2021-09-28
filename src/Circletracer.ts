@@ -105,10 +105,12 @@ export class Circletracer {
 
     private _getHtmlForWebview(webview: vscode.Webview) {
         // Local path to main script run in the webview
+        const loadFileOnDisk = vscode.Uri.joinPath(this._extensionUri, 'media/Circletracer', 'loadfile.js');
         const treeMapOnDisk = vscode.Uri.joinPath(this._extensionUri, 'media/Circletracer', 'treemap.js');
         const dagreOnDisk = vscode.Uri.joinPath(this._extensionUri, 'media/Circletracer', 'dagre-d3.min.js');
 
         // And the uri we use to load this script in the webview
+        const loadFileUri = (loadFileOnDisk).with({ 'scheme': 'vscode-resource' });
         const treeMapUri = (treeMapOnDisk).with({ 'scheme': 'vscode-resource' });
         const dagreUri = (dagreOnDisk).with({ 'scheme': 'vscode-resource' });
 
@@ -137,6 +139,7 @@ export class Circletracer {
 
 				<link nonce="${nonce}" href="${styleNodeUri}" rel="stylesheet">
 				<script src="${dagreUri}"></script>
+                <script src="${loadFileUri}"></script>
 				<script src="https://code.jquery.com/jquery-latest.min.js" type="text/javascript"></script>
 				<script src="https://d3js.org/d3.v5.min.js"></script>				
 				<script src="${treeMapUri}"></script>
@@ -150,8 +153,8 @@ export class Circletracer {
                         <div id="main">
                             <nav>
                                 <div class="left-btns">
-                                    <button class="json-load-btn">Load First Json File</button>
-                                    <button class="json-load-btn">Load Second Json File</button>
+                                    <button class="json-load-btn" onclick="openFileSelector('1');">Load First Json File</button>
+                                    <button class="json-load-btn" onclick="openFileSelector('2');">Load Second Json File</button>
                                 </div>
                             </nav>
                             <div id="wrapper"></div>
