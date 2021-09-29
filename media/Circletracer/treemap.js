@@ -16,14 +16,11 @@ function TreeMap(json) {
 		let location = element.properties.location;
 		let attributes = element.attributes;
 		let inputs = element.inputs;
-		let outputs = element.outputs;
-		if (type === "CONCATENATION") { //multiple parents			
-			inputs.forEach(input => {
+		let outputs = element.outputs;		
+		inputs.forEach(input => {
+			if (input.edge == true)
 				parentsIndex.push(input);
-			});
-		} else {
-			parentsIndex.push(inputs[0]);
-		}
+		});
 
 		let node = {
 			'index': myIndex,
