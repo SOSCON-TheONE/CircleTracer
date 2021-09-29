@@ -16,9 +16,9 @@ function TreeMap(json) {
 		let location = element.properties.location;
 		let attributes = element.attributes;
 		let inputs = element.inputs;
-		let outputs = element.outputs;		
+		let outputs = element.outputs;
 		inputs.forEach(input => {
-			if (input.edge == true)
+			if (input.edge === true)
 				parentsIndex.push(input);
 		});
 
@@ -36,21 +36,19 @@ function TreeMap(json) {
 		let label = `<p class='type'>${type}</p>`;
 
 		// inputs label create
-		if (type !== "CONCATENATION") {
-			inputs.forEach((input, checkIdx) => {
-				if (checkIdx === 0) {
-					return;
-				}
+		inputs.forEach((input, checkIdx) => {
+			if (checkIdx === 0 || input.edge === true) {
+				return;
+			}
 
-				label += `<p><label><b>input${checkIdx}</b></label><span>&lt;${getTypeArray('x', input.type)}&gt;</span></p>`;
-			})
+			label += `<p><label><b>input${checkIdx}</b></label><span>&lt;${getTypeArray('x', input.type)}&gt;</span></p>`;
+		})
 
-			attributes.forEach(attr => {
-				if (attr['attribute'] === 'fused_activation_function' && attr['value'] !== 'NONE') {
-					label += `<p class='activation'>${attr['value']}</p>`
-				}
-			})
-		}
+		attributes.forEach(attr => {
+			if (attr['attribute'] === 'fused_activation_function' && attr['value'] !== 'NONE') {
+				label += `<p class='activation'>${attr['value']}</p>`
+			}
+		})
 
 		// if element has duration
 		if (element.hasOwnProperty('duration')) {
