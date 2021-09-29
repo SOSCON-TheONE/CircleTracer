@@ -37,7 +37,8 @@
       },
       {
         "command": "onevscode.circle-tracer",
-        "title": "one visualizer circle tracer"
+        "title": "one visualizer circle tracer",
+        "category": "ONE"
       }
     ],
     "languages": [
