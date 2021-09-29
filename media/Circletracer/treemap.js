@@ -4,13 +4,7 @@ function TreeMap(json) {
 	circleJson = json;
 	durCircleJson = json;
 	let g = new dagreD3.graphlib.Graph()
-		.setGraph({})
-		.setDefaultNodeLabel(function () {
-			return {};
-		})
-		.setDefaultEdgeLabel(function () {
-			return {};
-		});
+		.setGraph({});
 	let nodes = [];
 	let inputNode, outputNode;
 
@@ -51,14 +45,7 @@ function TreeMap(json) {
 					return;
 				}
 
-				let typeStr = '';
-				let currentType = input.type;
-				for (key in currentType) {
-					typeStr += currentType[key] + 'x';
-				}
-				typeStr = typeStr.slice(0, -1);
-
-				label += `<p><label><b>input${checkIdx}</b></label><span>&lt;${typeStr}&gt;</span></p>`;
+				label += `<p><label><b>input${checkIdx}</b></label><span>&lt;${getTypeArray('x', input.type)}&gt;</span></p>`;
 			})
 
 			attributes.forEach(attr => {
@@ -130,13 +117,7 @@ function TreeMap(json) {
 		let index = node.index;
 		let parents = node.parents;
 		parents.forEach(parent => {
-			let label = `<p class="edge-label">`;
-			let currentType = parent.type;
-			for (key in currentType) {
-				label += currentType[key] + 'x';
-			}
-			label = label.slice(0, -1);
-			label += `</p>`
+			let label = `<p class="edge-label">${getTypeArray('x', parent.type)}</p>`;
 
 			g.setEdge(parent.location, index, { labelType: 'html', label: label, curve: d3.curveBasis, arrowheadClass: 'arrowhead' });
 			console.log(parent.location + "->" + index);
@@ -201,160 +182,84 @@ function scrolled() {
 	wrapper.call(d3.zoom().translateTo, x / scale, y / scale);
 }
 
-function openDetail() {
-	document.querySelector('#main').style.marginRight = "35%";
-	document.querySelector('#detail').style.width = "35%";
-	document.querySelector("#detail").style.display = "block";
-}
+// function openDetail() {
+// 	document.querySelector('#main').style.marginRight = "35%";
+// 	document.querySelector('#detail').style.width = "35%";
+// 	document.querySelector("#detail").style.display = "block";
+// }
 
-function closeDetail() {
-	removeElementsByClass('detail-content-list');
-	document.querySelector('#main').style.marginRight = "0%";
-	document.querySelector("#detail").style.display = "none";
-}
+// function closeDetail() {
+// 	document.querySelector('#main').style.marginRight = "0%";
+// 	document.querySelector("#detail").style.display = "none";
+// 	// removeElementsByClass('detail-content-list');
+// }
 
-function createDetailContent(nodes, id, g) {
-	var _node = g.node(id);
-	console.log("Clicked " + id, _node);
+// function createDetailContent(nodes, id, g) {
+// 	var _node = g.node(id);
+// 	console.log("Clicked " + id, _node);
 
-	removeElementsByClass('detail-content-list');
-	nodes.forEach(node => {
-		if (node.index == id) {
-			for (let key in node) {
-				if (key === 'type' || key === 'location') {
-					let name = document.createElement('div');
-					name.setAttribute("class", "detail-content-name detail-content-list");
-					let label = document.createElement('label');
-					label.innerHTML = key;
-					name.appendChild(label);
+// 	removeElementsByClass('detail-content-list');
+// 	nodes.forEach(node => {
+// 		if (node.index == id) {
+// 			for (let key in node) {
+// 				if (key === 'type' || key === 'location') {
+// 					createDetailItem(key, node[key], '#node-properties-content');
+// 				}
 
-					let value = document.createElement('div');
-					value.setAttribute("class", "detail-content-item detail-content-list");
-					value.innerHTML = node[key];
+// 				if (key == 'attributes') {
+// 					node[key].forEach(element => {
+// 						createDetailItem(element['attribute'], element['value'], '#attributes-content');
+// 					})
+// 				}
 
-					document.querySelector('#node-properties-content').appendChild(name);
-					document.querySelector('#node-properties-content').appendChild(value);
-				}
+// 				if (key == 'inputs') {
+// 					node[key].forEach((input, idx) => {
+// 						createDetailItem(`input ${idx}`, `name: ${input['name']}`, '#inputs-content');
+// 						createDetailItem('', `type: [${getTypeArray(',', input['type'])}]`, '#inputs-content');
+// 						createDetailItem('', `location: ${input['location']}`, '#inputs-content');
+// 					})
+// 				}
 
-				if (key == 'attributes') {
-					node[key].forEach(element => {
-						let name = document.createElement('div');
-						name.setAttribute("class", "detail-content-name detail-content-list");
-						let label = document.createElement('label');
-						label.innerHTML = element['attribute'];
-						name.appendChild(label);
+// 				if (key == 'outputs') {
+// 					node[key].forEach(output => {
+// 						createDetailItem(`output`, `name: ${output['name']}`, '#outputs-content');
+// 						createDetailItem('', `type: [${getTypeArray(',', output['type'])}]`, '#outputs-content');
+// 						createDetailItem('', `location: ${output['location']}`, '#outputs-content');
+// 					})
+// 				}
+// 			}
+// 		}
+// 	})
+// 	openDetail();
+// }
 
-						let value = document.createElement('div');
-						value.setAttribute("class", "detail-content-item detail-content-list");
-						value.innerHTML = element['value'];
+// function removeElementsByClass(className) {
+// 	const elements = document.getElementsByClassName(className);
+// 	while (elements.length > 0) {
+// 		elements[0].parentNode.removeChild(elements[0]);
+// 	}
+// }
 
-						document.querySelector('#attributes-content').appendChild(name);
-						document.querySelector('#attributes-content').appendChild(value);
-					})
-				}
+// function getTypeArray(delimeter, type) {
+// 	let result = '';
+// 	for (key in type) {
+// 		result = result + type[key] + delimeter;
+// 	}
+// 	result = result.slice(0, -1);
+// 	return result;
+// }
 
-				if (key == 'inputs') {
-					node[key].forEach((input, idx) => {
-						let name = document.createElement('div');
-						name.setAttribute("class", "detail-content-name detail-content-list");
-						let label = document.createElement('label');
-						label.innerHTML = `input ${idx}`;
-						name.appendChild(label);
+// function createDetailItem(key, inputValue, selector) {
+// 	let name = document.createElement('div');
+// 	name.setAttribute("class", "detail-content-name detail-content-list");
+// 	let label = document.createElement('label');
+// 	label.innerHTML = key;
+// 	name.appendChild(label);
 
-						let value = document.createElement('div');
-						value.setAttribute("class", "detail-content-item detail-content-list");
-						value.innerHTML = `name: ${input['name']}`;
+// 	let value = document.createElement('div');
+// 	value.setAttribute("class", "detail-content-item detail-content-list");
+// 	value.innerHTML = inputValue;
 
-						document.querySelector('#inputs-content').appendChild(name);
-						document.querySelector('#inputs-content').appendChild(value);
-
-						name = document.createElement('div');
-						name.setAttribute("class", "detail-content-name detail-content-list");
-						label = document.createElement('label');
-						name.appendChild(label);
-
-						value = document.createElement('div');
-						value.setAttribute("class", "detail-content-item detail-content-list");
-						value.innerHTML = `type: ${getTypeArray(input['type'])}`;
-
-						document.querySelector('#inputs-content').appendChild(name);
-						document.querySelector('#inputs-content').appendChild(value);
-
-						name = document.createElement('div');
-						name.setAttribute("class", "detail-content-name detail-content-list");
-						label = document.createElement('label');
-						name.appendChild(label);
-
-						value = document.createElement('div');
-						value.setAttribute("class", "detail-content-item detail-content-list");
-						value.innerHTML = `location: ${input['location']}`;
-
-						document.querySelector('#inputs-content').appendChild(name);
-						document.querySelector('#inputs-content').appendChild(value);
-					})
-				}
-
-				if (key == 'outputs') {
-					node[key].forEach(output => {
-						let name = document.createElement('div');
-						name.setAttribute("class", "detail-content-name detail-content-list");
-						let label = document.createElement('label');
-						label.innerHTML = 'output';
-						name.appendChild(label);
-
-						let value = document.createElement('div');
-						value.setAttribute("class", "detail-content-item detail-content-list");
-						value.innerHTML = `name: ${output['name']}`;
-
-						document.querySelector('#outputs-content').appendChild(name);
-						document.querySelector('#outputs-content').appendChild(value);
-
-						name = document.createElement('div');
-						name.setAttribute("class", "detail-content-name detail-content-list");
-						label = document.createElement('label');
-						name.appendChild(label);
-
-						value = document.createElement('div');
-						value.setAttribute("class", "detail-content-item detail-content-list");
-						value.innerHTML = `type: ${getTypeArray(output['type'])}`;
-
-						document.querySelector('#outputs-content').appendChild(name);
-						document.querySelector('#outputs-content').appendChild(value);
-
-						name = document.createElement('div');
-						name.setAttribute("class", "detail-content-name detail-content-list");
-						label = document.createElement('label');
-						name.appendChild(label);
-
-						value = document.createElement('div');
-						value.setAttribute("class", "detail-content-item detail-content-list");
-						value.innerHTML = `location: ${output['location']}`;
-
-						document.querySelector('#outputs-content').appendChild(name);
-						document.querySelector('#outputs-content').appendChild(value);
-					})
-				}
-			}
-		}
-	})
-	openDetail();
-}
-
-function removeElementsByClass(className) {
-	const elements = document.getElementsByClassName(className);
-	while (elements.length > 0) {
-		elements[0].parentNode.removeChild(elements[0]);
-	}
-}
-
-function getTypeArray(type) {
-	let result = '[';
-
-	for (key in type) {
-		result = result + type[key] + ',';
-	}
-	result = result.slice(0, -1);
-	result += ']';
-
-	return result;
-}
+// 	document.querySelector(selector).appendChild(name);
+// 	document.querySelector(selector).appendChild(value);
+// }

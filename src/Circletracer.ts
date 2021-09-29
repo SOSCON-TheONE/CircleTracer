@@ -121,6 +121,9 @@ export class Circletracer {
         const treeMapOnDisk = this.getMediaPath('treemap.js');
         const treeMapUri = treeMapOnDisk.with({ 'scheme': 'vscode-resource' });
 
+        const makeDataOnDisk = this.getMediaPath('makeData.js');
+        const makeDataUri = makeDataOnDisk.with({ 'scheme': 'vscode-resource' });
+
         const dagreOnDisk = this.getMediaPath('dagre-d3.min.js');
         const dagreUri = dagreOnDisk.with({ 'scheme': 'vscode-resource' });
 
@@ -140,7 +143,7 @@ export class Circletracer {
         html = html.replace(/_loadFileUri/g, `${loadFileUri}`);
         html = html.replace(/_treeMapUri/g, `${treeMapUri}`);
         html = html.replace(/_dagreUri/g, `${dagreUri}`);
-        html = html.replace(/_dagreUri/g, `${dagreUri}`);
+        html = html.replace(/_makeDataUri/g, `${makeDataUri}`);
         html = html.replace(/_Circletracer._circleToJsonData/g, `${`${Circletracer._circleToJsonData}`}`);
 
         return html;
