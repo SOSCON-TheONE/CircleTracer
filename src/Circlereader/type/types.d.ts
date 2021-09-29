@@ -13,7 +13,8 @@ export declare type  NodeAttributes = {
 export declare type  NodeInput = {
     location: Number,
     name: String,
-    type: Int32Array
+    type: Int32Array,
+    edge: Boolean
 }
 export declare type  NodeOutput = {
     location: Number,
